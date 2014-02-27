@@ -8,4 +8,12 @@
     <p>Posted by {{ username }}</p>
 {% endfor %}
 
+
+<form class="post_to_wall" method="POST">
+    <h2 class="signin-heading">Create a new entry</h2>
+
+    <textarea class="form-control" placeholder="Write a post!" name="content"></textarea>
+    <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit">
+</form>
+
 {% endblock %}

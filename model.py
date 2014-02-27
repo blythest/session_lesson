@@ -23,8 +23,10 @@ def get_user_by_name(username):
     query = """SELECT id FROM Users WHERE username == ?"""
     DB.execute(query, (username,))
     user_id_tup = DB.fetchone()
-    user_id = user_id_tup[0]
-    return user_id   
+    if user_id_tup == None:
+        return None
+    else:
+        return user_id_tup[0]
 
 def get_password(username):
     query = """SELECT password FROM Users WHERE username == ?"""
@@ -58,4 +60,12 @@ def get_user_posts(username):
     DB.execute(query, (user_id,))
     posts = DB.fetchall()
     return posts
+
+def create_new_account(username, password):
+    connect_to_db()
+    query = """INSERT INTO Users (username, password) VALUES (?, ?)"""
+    password = hash(password)
+    DB.execute(query, (username, password))
+    CONN.commit()
+    return (username, password)
 

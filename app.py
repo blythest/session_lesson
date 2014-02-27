@@ -23,8 +23,7 @@ def process_login():
     if model.authenticate(username, password):
         flash("User authenticated")
         session['user_id'] = user_id
-        redirect_string = "/user/%s" % username
-        return redirect(redirect_string)
+        return redirect(url_for("view_user", username=request.form.get("username")))
     else:
         flash("Password incorrect, there may be a ferret stampede in progress!")
         return redirect(url_for("index"))
@@ -32,10 +31,8 @@ def process_login():
 @app.route("/register")
 def register():
     if session.get("user_id"):
-        user_id = session.get("user_id")
-        username = model.get_username_by_id(user_id)
-        redirect_string = "/user/%s" % username
-        return redirect(redirect_string)
+        username = model.get_username_by_id(session.get("user_id"))
+        return redirect(url_for('view_user', username=username))
     return render_template("register.html")
 
 @app.route("/user/<username>")
@@ -43,7 +40,7 @@ def view_user(username):
     model.connect_to_db()
     posts = model.get_user_posts(username)
     print posts
-    return render_template("wall.html", posts=posts, username=username)
+    return render_template("wall.html", posts=posts, username=username, session=session)
 
 @app.route("/user/<username>", methods=["POST"])
 def post_to_wall(username):
@@ -52,10 +49,26 @@ def post_to_wall(username):
     author_id = session['user_id']
     owner_id = model.get_user_by_name(username)
     model.create_new_post(owner_id, author_id, content)
-    redirect_string = "/user/%s" % username
-    return redirect(redirect_string)
+    # redirect_string = "/user/%s" % username
+    return redirect(url_for('view_user', username=username))
 
-    #extract a fucking username from parameters
+@app.route("/create_account", methods=["POST"])
+def create_account():  
+    model.connect_to_db()
+    username = request.form.get("username")
+    
+    user_id = model.get_user_by_name("username")
+    if user_id == None:
+        print 'there is no user id.'
+        username = request.form.get("username")
+        password = request.form.get("password")
+        flash('Account successfully created.')
+        model.create_new_account(username,password)
+        return redirect(url_for("index"))
+    else:
+        flash('User already exists.')
+        return redirect(url_for('register'))
+
 
 
 @app.route("/logout")
