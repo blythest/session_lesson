@@ -1,0 +1,11 @@
+
+{% extends 'master.html' %}
+
+{% block body %}
+
+{% for post in posts %}
+    <div>{{ post[0] }}</div>
+    <p>Posted by {{ username }}</p>
+{% endfor %}
+
+{% endblock %}

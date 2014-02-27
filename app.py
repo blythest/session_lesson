@@ -6,20 +6,23 @@ app.secret_key = "shhhhthisisasecret"
 
 @app.route("/")
 def index():
-    if session.get("username"):
-        return "User %s is logged in!!!!" %session['username']
+    if session.get("user_id"):
+        user_id = session.get("user_id")
+        username = model.get_username_by_id(user_id)
+        return "User %s is logged in!!!!" % username
     else:
         return render_template("index.html")
 
 @app.route("/", methods=["POST"])
 def process_login():
+    model.connect_to_db()
     username = request.form.get("username")
     password = request.form.get("password")
 
-    username = model.authenticate(username, password)
+    user_id = model.authenticate(username, password)
     if model.authenticate(username, password):
         flash("User authenticated")
-        session['username'] = username
+        session['user_id'] = user_id
     else:
         flash("Password incorrect, there may be a ferret stampede in progress!")
 
@@ -28,6 +31,13 @@ def process_login():
 @app.route("/register")
 def register():
     return render_template("register.html")
+
+@app.route("/user/<username>")
+def view_user(username):
+    model.connect_to_db()
+    posts = model.get_user_posts(username)
+    print posts
+    return render_template("wall.html", posts=posts, username=username)
 
 @app.route("/logout")
 def get_me_out_of_here():
