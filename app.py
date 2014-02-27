@@ -23,13 +23,19 @@ def process_login():
     if model.authenticate(username, password):
         flash("User authenticated")
         session['user_id'] = user_id
+        redirect_string = "/user/%s" % username
+        return redirect(redirect_string)
     else:
         flash("Password incorrect, there may be a ferret stampede in progress!")
-
-    return redirect(url_for("index"))
+        return redirect(url_for("index"))
 
 @app.route("/register")
 def register():
+    if session.get("user_id"):
+        user_id = session.get("user_id")
+        username = model.get_username_by_id(user_id)
+        redirect_string = "/user/%s" % username
+        return redirect(redirect_string)
     return render_template("register.html")
 
 @app.route("/user/<username>")
@@ -38,6 +44,19 @@ def view_user(username):
     posts = model.get_user_posts(username)
     print posts
     return render_template("wall.html", posts=posts, username=username)
+
+@app.route("/user/<username>", methods=["POST"])
+def post_to_wall(username):
+    model.connect_to_db()
+    content = request.form.get("content")
+    author_id = session['user_id']
+    owner_id = model.get_user_by_name(username)
+    model.create_new_post(owner_id, author_id, content)
+    redirect_string = "/user/%s" % username
+    return redirect(redirect_string)
+
+    #extract a fucking username from parameters
+
 
 @app.route("/logout")
 def get_me_out_of_here():

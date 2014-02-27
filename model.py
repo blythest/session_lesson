@@ -45,6 +45,12 @@ def connect_to_db():
     CONN = sqlite3.connect('thewall.db')
     DB = CONN.cursor()
 
+def create_new_post(owner_id, author_id, content):
+    query = """INSERT INTO Wall_posts (owner_id, author_id, content) VALUES (?,?,?)"""
+    DB.execute(query, (owner_id, author_id, content))
+    CONN.commit()
+    return (author_id, owner_id, content)
+
 def get_user_posts(username):
     user_id = get_user_by_name(username)
     query = """SELECT Wall_posts.content
